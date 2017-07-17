@@ -6,10 +6,11 @@
 \usage{
 cvm_prioritylasso(X, Y, family, type.measure, blocks.list,
   max.coef.list = NULL, block1.penalization = TRUE,
-  lambda.type = "lambda.min", standardize = TRUE, nfolds = 10, ...)
+  lambda.type = "lambda.min", standardize = TRUE, nfolds = 10,
+  cvoffset = FALSE, cvoffsetnfolds = 10, ...)
 }
 \arguments{
-\item{X}{a (nxp) matrix of predictors with observations in rows and predictors in columns.}
+\item{X}{a (nxp) matrix or data frame of predictors with observations in rows and predictors in columns.}
 
 \item{Y}{n-vector giving the value of the response (either continuous, numeric-binary 0/1, or \code{Surv} object).}
 
@@ -29,10 +30,14 @@ cvm_prioritylasso(X, Y, family, type.measure, blocks.list,
 
 \item{nfolds}{the number of CV procedure folds.}
 
+\item{cvoffset}{logical, whether CV should be used to estimate the offsets. Default is FALSE.}
+
+\item{cvoffsetnfolds}{the number of folds in the CV procedure that is performed to estimate the offsets. Default is 10. Only relevant if \code{cvoffset=TRUE}.}
+
 \item{...}{Other arguments that can be passed to the function \code{cv.glmnet}.}
 }
 \value{
-list with the following elements. If they are lists themselves, they contain the results for each penalized block of the best result.
+object of class \code{prioritylasso} with the following elements. If these elements are lists, they contain the results for each penalized block of the best result.
 \describe{
 \item{\code{lambda.ind}}{list with indices of lambda for \code{lambda.type}.}
 \item{\code{lambda.type}}{type of lambda which is used for the predictions.}

@@ -3,7 +3,7 @@
 #' Runs prioritylasso for a list of block specifications and gives the best results
 #' in terms of cv error.
 #'
-#' @param X a (nxp) matrix of predictors with observations in rows and predictors in columns.
+#' @param X a (nxp) matrix or data frame of predictors with observations in rows and predictors in columns.
 #' @param Y n-vector giving the value of the response (either continuous, numeric-binary 0/1, or \code{Surv} object).
 #' @param family should be "gaussian" for continuous \code{Y}, "binomial" for binary \code{Y}, "cox" for \code{Y} of type \code{Surv}.
 #' @param type.measure The accuracy/error measure computed in cross-validation. It should be "class" (classification error) or "auc" (area under the ROC curve) if \code{family="binomial"}, "mse" (mean squared error) if \code{family="gaussian"} and "deviance" if \code{family="cox"} which uses the partial-likelihood.
@@ -13,9 +13,12 @@
 #' @param lambda.type specifies the value of lambda used for the predictions. \code{lambda.min} gives lambda with minimum cross-validated errors. \code{lambda.1se} gives the largest value of lambda such that error is within 1 standard error of the minimum. Note that \code{lambda.1se} can only be chosen without restrictions of \code{max.coef}.
 #' @param standardize logical, whether the predictors should be standardized or not. Default is TRUE.
 #' @param nfolds the number of CV procedure folds.
+#' @param cvoffset logical, whether CV should be used to estimate the offsets. Default is FALSE.
+#' @param cvoffsetnfolds the number of folds in the CV procedure that is performed to estimate the offsets. Default is 10. Only relevant if \code{cvoffset=TRUE}.
+
 #' @param ... Other arguments that can be passed to the function \code{cv.glmnet}.
 #'
-#' @return list with the following elements. If they are lists themselves, they contain the results for each penalized block of the best result.
+#' @return object of class \code{prioritylasso} with the following elements. If these elements are lists, they contain the results for each penalized block of the best result.
 #' \describe{
 #' \item{\code{lambda.ind}}{list with indices of lambda for \code{lambda.type}.}
 #' \item{\code{lambda.type}}{type of lambda which is used for the predictions.}
@@ -53,7 +56,7 @@
 
 cvm_prioritylasso <- function(X, Y, family, type.measure, blocks.list, max.coef.list = NULL,
                               block1.penalization = TRUE, lambda.type = "lambda.min",
-                              standardize = TRUE, nfolds = 10, ...){
+                              standardize = TRUE, nfolds = 10, cvoffset = FALSE, cvoffsetnfolds = 10, ...){
 
   if(!is.null(max.coef.list)){
     if(length(blocks.list) != length(max.coef.list)){stop("blocks.list and max.coef.list must have the same length.")}
@@ -66,8 +69,9 @@ cvm_prioritylasso <- function(X, Y, family, type.measure, blocks.list, max.coef.
 
   for(j in 1:nlist){
     all_res[[j]] <- prioritylasso(X, Y, family = family, type.measure = type.measure, blocks = blocks.list[[j]],
-                                  max.coef = max.coef.list[[j]], block1.penalization = block1.penalization, lambda.type = lambda.type,
-                                  standardize = standardize, nfolds = nfolds, ...)
+                                  max.coef = max.coef.list[[j]], block1.penalization = block1.penalization,
+                                  lambda.type = lambda.type, standardize = standardize, nfolds = nfolds,
+                                  cvoffset = cvoffset, cvoffsetnfolds = cvoffsetnfolds, ...)
 
 
     if (type.measure != "auc"){
@@ -100,6 +104,8 @@ cvm_prioritylasso <- function(X, Y, family, type.measure, blocks.list, max.coef.
                     block1unpen = all_res[[ind.best.pr]]$block1unpen, best.blocks = best.blocks,
                     best.max.coef = max.coef.list[[ind.best.pr]], coefficients = all_res[[ind.best.pr]]$coefficients,
                     call = match.call())
+
+  class(finallist) <- "prioritylasso"
 
   return(finallist)
 

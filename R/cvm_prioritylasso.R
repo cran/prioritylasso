@@ -35,7 +35,7 @@
 #' }
 #'
 #' @note The function description and the first example are based on the R package \code{ipflasso}.
-#' @author Simon Klau, Anne-Laure Boulesteix \cr
+#' @author Simon Klau \cr
 #'         Maintainer: Simon Klau (\email{simonklau@ibe.med.uni-muenchen.de})
 #' @references Klau, Simon (2016): Praediktion der Ueberlebenszeit von Leukaemie-Patienten unter Beruecksichtigung verschiedener omics-Daten. Institut fuer Statistik, Ludwig-Maximilians-Universitaet Muenchen.
 #' @export

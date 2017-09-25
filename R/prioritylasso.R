@@ -40,7 +40,7 @@
 #' }
 #'
 #' @note The function description and the first example are based on the R package \code{ipflasso}. The second example is inspired by the example of \code{\link[glmnet]{cv.glmnet}} from the \code{glmnet} package.
-#' @author Simon Klau, Anne-Laure Boulesteix \cr
+#' @author Simon Klau, Roman Hornung \cr
 #' Maintainer: Simon Klau (\email{simonklau@ibe.med.uni-muenchen.de})
 #' @seealso \code{\link[prioritylasso]{pl_data}}, \code{\link[prioritylasso]{cvm_prioritylasso}}, \code{\link[ipflasso]{cvr.ipflasso}}, \code{\link[ipflasso]{cvr2.ipflasso}}
 #' @references Klau, Simon (2016): Praediktion der Ueberlebenszeit von Leukaemie-Patienten unter Beruecksichtigung verschiedener omics-Daten. Institut fuer Statistik, Ludwig-Maximilians-Universitaet Muenchen.
@@ -48,6 +48,7 @@
 #' @import stats
 #' @import glmnet
 #' @import survival
+#' @import utils
 #' @examples
 #' # gaussian
 #'   prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rnorm(50), family = "gaussian",
@@ -86,6 +87,10 @@
 prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
                           block1.penalization = TRUE, lambda.type = "lambda.min", standardize = TRUE,
                           nfolds = 10, cvoffset = FALSE, cvoffsetnfolds = 10, ...){
+
+  if (packageVersion("glmnet") < "2.0.13") {
+    stop("glmnet >= 2.0.13 needed for this function.", call. = FALSE)
+  }
 
   if(is.null(max.coef)){
     max.coef <- rep(+Inf, length(blocks))
@@ -184,13 +189,13 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
             }
 
             pred[cvdiv[[count]] == 0,] <- predict(lassoergtemp, newx = X[cvdiv[[count]] == 0, actual_block],
-                                                  offset = liste[[i]][cvdiv[[count]]==1,drop=FALSE],
+                                                  newoffset = liste[[i]][cvdiv[[count]]==1,drop=FALSE],
                                                   s=lambda.type, type="link")
 
           }
         }
         else
-          pred <- predict(lassoerg[[i]], newx=X[,actual_block], offset = liste[[i]], s=lambda.type, type="link")
+          pred <- predict(lassoerg[[i]], newx=X[,actual_block], newoffset = liste[[i]], s=lambda.type, type="link")
 
         lambda.ind[i] <- which(lassoerg[[i]]$lambda == lassoerg[[i]][lambda.type])
         lambda.min[i] <- lassoerg[[i]][lambda.type]
@@ -233,13 +238,13 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
 
             lambda.mintemp <- lassoergtemp$lambda[which_lambdatemp[which.min(lcvmitemp[which_lambdatemp])[1]]]
             pred[cvdiv[[count]] == 0,] <- predict(lassoergtemp, newx = X[cvdiv[[count]] == 0, actual_block],
-                                                  offset = liste[[i]][cvdiv[[count]] == 1, drop=FALSE],
+                                                  newoffset = liste[[i]][cvdiv[[count]] == 1, drop=FALSE],
                                                   s = lambda.mintemp, type = "link")
 
           }
         }
         else
-          pred <- predict(lassoerg[[i]], newx = X[,actual_block], offset = liste[[i]], s = lambda.min[[i]],
+          pred <- predict(lassoerg[[i]], newx = X[,actual_block], newoffset = liste[[i]], s = lambda.min[[i]],
                           type = "link")
 
         lambda.ind[i] <- which(lassoerg[[i]]$lambda == lambda.min[i])
@@ -339,13 +344,13 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
                                       nfolds = nfolds, standardize = standardize, ...)
 
             pred[cvdiv[[count]] == 0,] <- predict(lassoergtemp, newx = X[cvdiv[[count]] == 0, actual_block],
-                                                  offset = liste[[i-1]][cvdiv[[count]] == 1, drop = FALSE],
+                                                  newoffset = liste[[i-1]][cvdiv[[count]] == 1, drop = FALSE],
                                                   s = lambda.type, type = "link")
 
           }
         }
         else
-          pred <- predict(lassoerg[[i]], newx = X[,actual_block], offset = liste[[i-1]], s = lambda.type,
+          pred <- predict(lassoerg[[i]], newx = X[,actual_block], newoffset = liste[[i-1]], s = lambda.type,
                           type = "link")
 
         lambda.ind[i] <- which(lassoerg[[i]]$lambda == lassoerg[[i]][lambda.type])
@@ -380,12 +385,12 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
 
             lambda.mintemp <- lassoergtemp$lambda[which_lambdatemp[which.min(lcvmitemp[which_lambdatemp])[1]]]
             pred[cvdiv[[count]] == 0,] <- predict(lassoergtemp, newx=X[cvdiv[[count]] == 0, actual_block],
-                                                  offset = liste[[i-1]][cvdiv[[count]] == 1, drop = FALSE],
+                                                  newoffset = liste[[i-1]][cvdiv[[count]] == 1, drop = FALSE],
                                                   s = lambda.mintemp, type = "link")
 
           }
         } else {
-          pred <- predict(lassoerg[[i]], newx=X[,actual_block], offset = liste[[i-1]], s=lambda.min[[i]],
+          pred <- predict(lassoerg[[i]], newx=X[,actual_block], newoffset = liste[[i-1]], s=lambda.min[[i]],
                           type="link")
         }
 

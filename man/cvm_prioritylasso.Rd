@@ -80,6 +80,6 @@ Klau, Simon (2016): Praediktion der Ueberlebenszeit von Leukaemie-Patienten unte
 \code{\link[prioritylasso]{pl_data}}, \code{\link[prioritylasso]{prioritylasso}}, \code{\link[ipflasso]{cvr2.ipflasso}}
 }
 \author{
-Simon Klau, Anne-Laure Boulesteix \cr
+Simon Klau \cr
         Maintainer: Simon Klau (\email{simonklau@ibe.med.uni-muenchen.de})
 }

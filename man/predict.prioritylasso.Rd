@@ -4,8 +4,8 @@
 \alias{predict.prioritylasso}
 \title{Predictions from prioritylasso}
 \usage{
-\method{predict}{prioritylasso}(object, newdata, type = c("link", "response"),
-  ...)
+\method{predict}{prioritylasso}(object, newdata, type = c("link",
+  "response"), ...)
 }
 \arguments{
 \item{object}{An object of class \code{prioritylasso}.}

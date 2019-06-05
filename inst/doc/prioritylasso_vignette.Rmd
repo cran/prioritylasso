@@ -10,7 +10,7 @@ vignette: >
 ---
 
 ## Introduction
-prioritylasso was developed for situations in which different types of high dimensional omics-data in combination with clinical data are available. We want to include these so called blocks of data together in a prediction model. prioritylasso thereby tries to find a good compromise between prediction accuracy and practical aspects. This is done by letting the practitioner include prior knowlegde in the form of priorities, which define the importance of every block. The priorities can be chosen in several different ways.  
+prioritylasso was developed for situations in which different types of high dimensional omics-data in combination with clinical data are available. We want to include these so called blocks of data together in a prediction model. prioritylasso thereby tries to find a good compromise between prediction accuracy and practical aspects. This is done by letting the practitioner include prior knowledge in the form of priorities, which define the importance of every block. The priorities can be chosen in several different ways.  
 The model is successively calculated as LASSO-based, while the Linear Predictor after each fit is taken as an Offset in the LASSO Regression of the block with the next lowest priority. The Penalized Regression models are computed via the R package ```glmnet```. Moreover, the R package ```survival``` is used when the outcome consists of survival data. In addition to the main function, the package ```prioritylasso``` contains an extension of the standard function named cvm_prioritylasso. It is also explained under practical aspects in the following examples.
 
 ## Getting started with prioritylasso
@@ -26,7 +26,7 @@ dim(pl_data)
 colnames(pl_data)[1:30]
 colnames(pl_data)[1025:1029]
 ```
-We see that the last column contains the outcome. We will re-save the outcome and the matrix of predictors seperately and define the argument ```blocks``` afterwards. We will need that for the application of prioritylasso where the indices have to correspond with the variables in the predictor matrix.
+We see that the last column contains the outcome. We will re-save the outcome and the matrix of predictors separately and define the argument ```blocks``` afterwards. We will need that for the application of prioritylasso where the indices have to correspond with the variables in the predictor matrix.
 ```{r}
 pl_out <- pl_data[,1029]
 pl_pred <- pl_data[,1:1028]
@@ -52,7 +52,7 @@ Because we have a binary outcome, we specified ```family = "binomial"``` and ```
 
 ## prioritylasso - extended application
 #### Specifying the priorities
-If we want to specify another block order, we have to redefine the argument ```blocks```. Let us assume that we do not want to include the variables b1 first in the model, but b3 first, b1 second and b2 third. That would be done by ```blocks = list(bp1 = 10:28, bp2 = 1:4, bp3 = 5:9, bp4 = 29:1028)```. So the position on the list indicates when the variables are considered in the model or in other words, the priority. It is not neccessary to name the entries of the list, but it may help in avoiding confusion. We chose the names such that "bp1"" means "block of priority 1".
+If we want to specify another block order, we have to redefine the argument ```blocks```. Let us assume that we do not want to include the variables b1 first in the model, but b3 first, b1 second and b2 third. That would be done by ```blocks = list(bp1 = 10:28, bp2 = 1:4, bp3 = 5:9, bp4 = 29:1028)```. So the position on the list indicates when the variables are considered in the model or in other words, the priority. It is not necessary to name the entries of the list, but it may help in avoiding confusion. We chose the names such that "bp1"" means "block of priority 1".
 ```{r}
 set.seed(1234)
 pl2 <- prioritylasso(X = pl_train, Y = pl_out_train, family = "binomial", type.measure = "auc", 
@@ -85,7 +85,7 @@ pl4$lambda.ind
 The first entries of the values which correspond to the ```blocks``` list remain empty as you can see for the example of ```lambda.ind```.
 
 #### Options for the cross validation procedure
-```nfolds``` and ```lambda.type``` are options which refer to the cross-validation procedure in ```cv.glmnet```. ```nfolds``` specifies the number of folds in the procedure while ```lambda.type``` handles the amount of cross-validation error. It can be set to either ```lambda.min```, which is also the default, or ```lambda.1se```. ```lambda.min``` gives the result with minimium mean cross-validation error, whereas ```lambda.1se``` gives the result such that the cross-validation error is within 1 standard error of the minimum, and thus leads to more sparse results. Note that the latter can only be chosen in combination with no restrictions in ```max.coef```. 
+```nfolds``` and ```lambda.type``` are options which refer to the cross-validation procedure in ```cv.glmnet```. ```nfolds``` specifies the number of folds in the procedure while ```lambda.type``` handles the amount of cross-validation error. It can be set to either ```lambda.min```, which is also the default, or ```lambda.1se```. ```lambda.min``` gives the result with minimum mean cross-validation error, whereas ```lambda.1se``` gives the result such that the cross-validation error is within 1 standard error of the minimum, and thus leads to more sparse results. Note that the latter can only be chosen in combination with no restrictions in ```max.coef```. 
 
 ```{r}
 set.seed(1234)
@@ -117,7 +117,7 @@ The corresponding mean cross validated error is stored in the list ```min.cvm```
 ```{r}
 pl1$min.cvm
 ```
-We see that for the example of pl1 it grows with the number of considered modalities. That is what we expected because the more coefficients we have in our model, the better the prediciton should be.
+We see that for the example of pl1 it grows with the number of considered modalities. That is what we expected because the more coefficients we have in our model, the better the prediction should be.
 
 ## Use of the function cvm_prioritylasso
 prioritylasso was generally implemented with the idea, that practitioners have prior knowledge about the data that allows them to specify the priorities. However, it might be, especially in the presence of several blocks, that it is not clear which order of blocks is the best. That is why we implemented cvm_prioritylasso that allows us to define more than one possible list of blocks. The function chooses the best block order according to the mean cross-validated error. Analogously, several vectors with maximal coefficients can be specified in ```max.coef.list```. In the next example we do not know if it is better to include variables b4 before those of b3.

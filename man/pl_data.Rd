@@ -10,7 +10,7 @@
   \item{b1: (\code{pl_data[,1:4]})}{4 binary variables representing variables with a known influence on the outcome.}
   \item{b2: (\code{pl_data[,5:9]})}{5 continuous variables representing clinical variables.}
   \item{b3: (\code{pl_data[,10:28]})}{19 binary variables representing mutations.}
-  \item{b4: (\code{pl_data[,29:1028]})}{1000 continous variables representing gene expression data.}
+  \item{b4: (\code{pl_data[,29:1028]})}{1000 continuous variables representing gene expression data.}
 }}
 \usage{
 pl_data
@@ -23,8 +23,8 @@ We generated the data in the following way: We took the empirical correlation of
 315 AML patients. This correlation served as a correlation matrix when generating 1028 multivariate
 normally distributed variables with the R function \code{\link[mvtnorm]{rmvnorm}}. Because we didn't have a positive
 definite matrix, we took the nearest positive definite matrix according to the function \code{\link[Matrix]{nearPD}}.
-The variables that should be binary were dichotomized, so that their marginal probablities corresponded to
-the marginal probablities they were based on.
+The variables that should be binary were dichotomized, so that their marginal probabilities corresponded to
+the marginal probabilities they were based on.
 The coefficients were defined by
 \itemize{
 \item{\code{beta_b1 <- c(0.8, 0.8, 0.6, 0.6)}}

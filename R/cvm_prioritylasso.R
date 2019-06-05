@@ -5,6 +5,7 @@
 #'
 #' @param X a (nxp) matrix or data frame of predictors with observations in rows and predictors in columns.
 #' @param Y n-vector giving the value of the response (either continuous, numeric-binary 0/1, or \code{Surv} object).
+#' @param weights observation weights. Default is 1 for each observation.
 #' @param family should be "gaussian" for continuous \code{Y}, "binomial" for binary \code{Y}, "cox" for \code{Y} of type \code{Surv}.
 #' @param type.measure The accuracy/error measure computed in cross-validation. It should be "class" (classification error) or "auc" (area under the ROC curve) if \code{family="binomial"}, "mse" (mean squared error) if \code{family="gaussian"} and "deviance" if \code{family="cox"} which uses the partial-likelihood.
 #' @param blocks.list list of the format \code{list(list(bp1=...,bp2=...,), list(bp1=,...,bp2=...,), ...)}. For the specification of the entries, see \code{\link[prioritylasso]{prioritylasso}}.
@@ -13,6 +14,7 @@
 #' @param lambda.type specifies the value of lambda used for the predictions. \code{lambda.min} gives lambda with minimum cross-validated errors. \code{lambda.1se} gives the largest value of lambda such that error is within 1 standard error of the minimum. Note that \code{lambda.1se} can only be chosen without restrictions of \code{max.coef}.
 #' @param standardize logical, whether the predictors should be standardized or not. Default is TRUE.
 #' @param nfolds the number of CV procedure folds.
+#' @param foldid an optional vector of values between 1 and nfold identifying what fold each observation is in.
 #' @param cvoffset logical, whether CV should be used to estimate the offsets. Default is FALSE.
 #' @param cvoffsetnfolds the number of folds in the CV procedure that is performed to estimate the offsets. Default is 10. Only relevant if \code{cvoffset=TRUE}.
 
@@ -37,7 +39,7 @@
 #' @note The function description and the first example are based on the R package \code{ipflasso}.
 #' @author Simon Klau \cr
 #'         Maintainer: Simon Klau (\email{simonklau@ibe.med.uni-muenchen.de})
-#' @references Klau, Simon (2016): Praediktion der Ueberlebenszeit von Leukaemie-Patienten unter Beruecksichtigung verschiedener omics-Daten. Institut fuer Statistik, Ludwig-Maximilians-Universitaet Muenchen.
+#' @references Klau, S., Jurinovic, V., Hornung, R., Herold, T., Boulesteix, A.-L. (2018). Priority-Lasso: a simple hierarchical approach to the prediction of clinical outcome using multi-omics data. BMC Bioinformatics 19, 322
 #' @export
 #' @seealso \code{\link[prioritylasso]{pl_data}}, \code{\link[prioritylasso]{prioritylasso}}, \code{\link[ipflasso]{cvr2.ipflasso}}
 #' @examples
@@ -54,9 +56,9 @@
 #'
 
 
-cvm_prioritylasso <- function(X, Y, family, type.measure, blocks.list, max.coef.list = NULL,
+cvm_prioritylasso <- function(X, Y, weights, family, type.measure, blocks.list, max.coef.list = NULL,
                               block1.penalization = TRUE, lambda.type = "lambda.min",
-                              standardize = TRUE, nfolds = 10, cvoffset = FALSE, cvoffsetnfolds = 10, ...){
+                              standardize = TRUE, nfolds = 10, foldid, cvoffset = FALSE, cvoffsetnfolds = 10, ...){
 
   if(!is.null(max.coef.list)){
     if(length(blocks.list) != length(max.coef.list)){stop("blocks.list and max.coef.list must have the same length.")}
@@ -68,17 +70,17 @@ cvm_prioritylasso <- function(X, Y, family, type.measure, blocks.list, max.coef.
   cvmin = +Inf
 
   for(j in 1:nlist){
-    all_res[[j]] <- prioritylasso(X, Y, family = family, type.measure = type.measure, blocks = blocks.list[[j]],
+    all_res[[j]] <- prioritylasso(X, Y, weights, family = family, type.measure = type.measure, blocks = blocks.list[[j]],
                                   max.coef = max.coef.list[[j]], block1.penalization = block1.penalization,
-                                  lambda.type = lambda.type, standardize = standardize, nfolds = nfolds,
+                                  lambda.type = lambda.type, standardize = standardize, nfolds = nfolds, foldid,
                                   cvoffset = cvoffset, cvoffsetnfolds = cvoffsetnfolds, ...)
 
 
     if (type.measure != "auc"){
-      mincvmj <-  all_res[[j]]$min.cvm[[length(blocks.list)]]
+      mincvmj <-  all_res[[j]]$min.cvm[[length(blocks.list[[j]])]]
     }
     if(type.measure == "auc"){
-      mincvmj <-  -all_res[[j]]$min.cvm[[length(blocks.list)]]
+      mincvmj <-  -all_res[[j]]$min.cvm[[length(blocks.list[[j]])]]
     }
 
 

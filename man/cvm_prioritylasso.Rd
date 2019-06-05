@@ -4,15 +4,17 @@
 \alias{cvm_prioritylasso}
 \title{prioritylasso with several block specifications}
 \usage{
-cvm_prioritylasso(X, Y, family, type.measure, blocks.list,
+cvm_prioritylasso(X, Y, weights, family, type.measure, blocks.list,
   max.coef.list = NULL, block1.penalization = TRUE,
   lambda.type = "lambda.min", standardize = TRUE, nfolds = 10,
-  cvoffset = FALSE, cvoffsetnfolds = 10, ...)
+  foldid, cvoffset = FALSE, cvoffsetnfolds = 10, ...)
 }
 \arguments{
 \item{X}{a (nxp) matrix or data frame of predictors with observations in rows and predictors in columns.}
 
 \item{Y}{n-vector giving the value of the response (either continuous, numeric-binary 0/1, or \code{Surv} object).}
+
+\item{weights}{observation weights. Default is 1 for each observation.}
 
 \item{family}{should be "gaussian" for continuous \code{Y}, "binomial" for binary \code{Y}, "cox" for \code{Y} of type \code{Surv}.}
 
@@ -29,6 +31,8 @@ cvm_prioritylasso(X, Y, family, type.measure, blocks.list,
 \item{standardize}{logical, whether the predictors should be standardized or not. Default is TRUE.}
 
 \item{nfolds}{the number of CV procedure folds.}
+
+\item{foldid}{an optional vector of values between 1 and nfold identifying what fold each observation is in.}
 
 \item{cvoffset}{logical, whether CV should be used to estimate the offsets. Default is FALSE.}
 
@@ -74,7 +78,7 @@ cvm_prioritylasso(X = pl_data[,1:1028], Y = pl_data[,1029], family = "binomial",
 
 }
 \references{
-Klau, Simon (2016): Praediktion der Ueberlebenszeit von Leukaemie-Patienten unter Beruecksichtigung verschiedener omics-Daten. Institut fuer Statistik, Ludwig-Maximilians-Universitaet Muenchen.
+Klau, S., Jurinovic, V., Hornung, R., Herold, T., Boulesteix, A.-L. (2018). Priority-Lasso: a simple hierarchical approach to the prediction of clinical outcome using multi-omics data. BMC Bioinformatics 19, 322
 }
 \seealso{
 \code{\link[prioritylasso]{pl_data}}, \code{\link[prioritylasso]{prioritylasso}}, \code{\link[ipflasso]{cvr2.ipflasso}}

@@ -2,21 +2,23 @@
 % Please edit documentation in R/prioritylasso.R
 \name{prioritylasso}
 \alias{prioritylasso}
-\title{Patient outcome prediction based on multi-omics data taking practicioners' preferences into account}
+\title{Patient outcome prediction based on multi-omics data taking practitioners' preferences into account}
 \usage{
-prioritylasso(X, Y, family, type.measure, blocks, max.coef = NULL,
-  block1.penalization = TRUE, lambda.type = "lambda.min",
-  standardize = TRUE, nfolds = 10, cvoffset = FALSE,
-  cvoffsetnfolds = 10, ...)
+prioritylasso(X, Y, weights, family, type.measure, blocks,
+  max.coef = NULL, block1.penalization = TRUE,
+  lambda.type = "lambda.min", standardize = TRUE, nfolds = 10,
+  foldid, cvoffset = FALSE, cvoffsetnfolds = 10, ...)
 }
 \arguments{
 \item{X}{a (nxp) matrix of predictors with observations in rows and predictors in columns.}
 
 \item{Y}{n-vector giving the value of the response (either continuous, numeric-binary 0/1, or \code{Surv} object).}
 
+\item{weights}{observation weights. Default is 1 for each observation.}
+
 \item{family}{should be "gaussian" for continuous \code{Y}, "binomial" for binary \code{Y}, "cox" for \code{Y} of type \code{Surv}.}
 
-\item{type.measure}{The accuracy/error measure computed in cross-validation. It should be "class" (classification error) or "auc" (area under the ROC curve) if \code{family="binomial"}, "mse" (mean squared error) if \code{family="gaussian"} and "deviance" if \code{family="cox"} which uses the partial-likelihood.}
+\item{type.measure}{accuracy/error measure computed in cross-validation. It should be "class" (classification error) or "auc" (area under the ROC curve) if \code{family="binomial"}, "mse" (mean squared error) if \code{family="gaussian"} and "deviance" if \code{family="cox"} which uses the partial-likelihood.}
 
 \item{blocks}{list of the format \code{list(bp1=...,bp2=...,)}, where the dots should be replaced by the indices of the predictors included in this block. The blocks should form a partition of 1:p.}
 
@@ -30,11 +32,13 @@ prioritylasso(X, Y, family, type.measure, blocks, max.coef = NULL,
 
 \item{nfolds}{the number of CV procedure folds.}
 
+\item{foldid}{an optional vector of values between 1 and nfold identifying what fold each observation is in.}
+
 \item{cvoffset}{logical, whether CV should be used to estimate the offsets. Default is FALSE.}
 
 \item{cvoffsetnfolds}{the number of folds in the CV procedure that is performed to estimate the offsets. Default is 10. Only relevant if \code{cvoffset=TRUE}.}
 
-\item{...}{Other arguments that can be passed to the function \code{cv.glmnet}.}
+\item{...}{other arguments that can be passed to the function \code{cv.glmnet}.}
 }
 \value{
 object of class \code{prioritylasso} with the following elements. If these elements are lists, they contain the results for each penalized block.
@@ -101,12 +105,12 @@ The function description and the first example are based on the R package \code{
 
 }
 \references{
-Klau, Simon (2016): Praediktion der Ueberlebenszeit von Leukaemie-Patienten unter Beruecksichtigung verschiedener omics-Daten. Institut fuer Statistik, Ludwig-Maximilians-Universitaet Muenchen.
+Klau, S., Jurinovic, V., Hornung, R., Herold, T., Boulesteix, A.-L. (2018). Priority-Lasso: a simple hierarchical approach to the prediction of clinical outcome using multi-omics data. BMC Bioinformatics 19, 322
 }
 \seealso{
 \code{\link[prioritylasso]{pl_data}}, \code{\link[prioritylasso]{cvm_prioritylasso}}, \code{\link[ipflasso]{cvr.ipflasso}}, \code{\link[ipflasso]{cvr2.ipflasso}}
 }
 \author{
-Simon Klau, Roman Hornung \cr
+Simon Klau, Roman Hornung, Alina Bauer \cr
 Maintainer: Simon Klau (\email{simonklau@ibe.med.uni-muenchen.de})
 }

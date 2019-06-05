@@ -53,6 +53,21 @@ pl3b <- prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rbinom(n=50, size=1,
                       cvoffset = TRUE)
 
 
+### testing weights and foldid
+
+set.seed(1234)
+pl5a <- prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rnorm(50), family = "gaussian", type.measure = "mse",
+                      blocks = list(block1=1:75, block2=76:200, block3=201:500),
+                      block1.penalization = TRUE, lambda.type = "lambda.1se", standardize = TRUE, nfolds = 5,
+                      weights = sample(rep(seq(1:2), length = 50)))
+
+set.seed(1234)
+pl5b <- prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rnorm(50), family = "gaussian", type.measure = "mse",
+                      blocks = list(block1=1:75, block2=76:200, block3=201:500),
+                      block1.penalization = TRUE, lambda.type = "lambda.1se", standardize = TRUE, nfolds = 10,
+                      foldid=sample(rep(seq(10),length=50)))
+
+###
 
 # cox
 n <- 50;p <- 300
@@ -132,6 +147,18 @@ test_that("testing error messages", {
                              block1.penalization = FALSE, standardize = TRUE, nfolds = 10, lambda.type = "lambda.min",
                              cvoffset = FALSE))
 
+  ### weights and foldid
+
+  expect_error(prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rnorm(50), family = "gaussian", type.measure = "mse",
+                        blocks = list(block1=1:75, block2=76:200, block3=201:500),
+                        block1.penalization = TRUE, lambda.type = "lambda.1se", standardize = TRUE, nfolds = 5,
+                        weights = sample(rep(seq(1:2), length = 40))))
+
+  expect_error(prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rnorm(50), family = "gaussian", type.measure = "mse",
+                       blocks = list(block1=1:75, block2=76:200, block3=201:500),
+                       block1.penalization = TRUE, lambda.type = "lambda.1se", standardize = TRUE, nfolds = 5,
+                       foldid=sample(rep(seq(10),length=40))))
+
 })
 
 
@@ -158,6 +185,13 @@ test_that("testing warning messages", {
                             max.coef = c(10,10,8), block1.penalization = TRUE, lambda.type = "lambda.1se", nfolds = 5),
               gives_warning("lambda.1se can only be chosen without restrictions of max.coef and is set to lambda.min."))
 
+  # foldid
+  expect_that(prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rnorm(50), family = "gaussian", type.measure = "mse",
+                        blocks = list(block1=1:75, block2=76:200, block3=201:500),
+                        block1.penalization = TRUE, lambda.type = "lambda.1se", standardize = TRUE, nfolds = 5,
+                        foldid=sample(rep(seq(10),length=50))),
+              gives_warning("nfolds is set to 10"))
+
 })
 
 
@@ -165,13 +199,15 @@ test_that("testing other stuff", {
 
   expect_that(dim(pl1$glmnet.fit[[1]]$beta)[1] , testthat::equals(75))
   expect_that(pl1$nzero, is_a("list"))
-  expect_that(pl1$name, matches("Mean-Squared Error"))
-  expect_that(pl1$nzero[[1]] <= 5, is_true())
-  expect_that(class(pl1a) == "prioritylasso", is_true())
-  expect_that(class(pl1b) == "prioritylasso", is_true())
-  expect_that(pl2a$lambda.type <= "lambda.1se", is_true())
-  expect_that(pl2b$lambda.type <= "lambda.1se", is_true())
-  expect_that(class(pl3a) == "prioritylasso", is_true())
-  expect_that(class(pl3b) == "prioritylasso", is_true())
+  expect_match(pl1$name, "Mean-Squared Error")
+  expect_true(pl1$nzero[[1]] <= 5)
+  expect_true(class(pl1a) == "prioritylasso")
+  expect_true(class(pl1b) == "prioritylasso")
+  expect_true(pl2a$lambda.type <= "lambda.1se")
+  expect_true(pl2b$lambda.type <= "lambda.1se")
+  expect_true(class(pl3a) == "prioritylasso")
+  expect_true(class(pl3b) == "prioritylasso")
+  expect_match(pl5a$name, "Mean-Squared Error")
+  expect_match(pl5b$name, "Mean-Squared Error")
 
 })

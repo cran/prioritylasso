@@ -80,14 +80,14 @@ context("tests for predict.prioritylasso")
 
 test_that("testing predictions for binomial family", {
 
-  expect_that(dim(bin1_predict)[1] == 30, is_true())
-  expect_that(class(bin2_predict) == "matrix", is_true())
+  expect_true(dim(bin1_predict)[1] == 30)
+  expect_true(class(bin2_predict) == "matrix")
 
 })
 
 test_that("testing predictions for gaussian family", {
 
-  expect_that(dim(gaussian1_predict)[2] == 1, is_true())
+  expect_true(dim(gaussian1_predict)[2] == 1)
 
 })
 
@@ -95,8 +95,8 @@ test_that("testing predictions for gaussian family", {
 
 test_that("testing predictions for cox family", {
 
-  expect_that(dim(cox1_predict)[1] == 30, is_true())
-  expect_that(dim(cox2_predict)[2] == 1, is_true())
+  expect_true(dim(cox1_predict)[1] == 30)
+  expect_true(dim(cox2_predict)[2] == 1)
 
 })
 

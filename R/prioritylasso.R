@@ -1,4 +1,4 @@
-#' Patient outcome prediction based on multi-omics data taking practicioners' preferences into account
+#' Patient outcome prediction based on multi-omics data taking practitioners' preferences into account
 #'
 #' Fits successive Lasso models for several ordered blocks of (omics) data and takes the predicted values as an offset for the next block.
 #'
@@ -13,17 +13,19 @@
 #'
 #' @param X a (nxp) matrix of predictors with observations in rows and predictors in columns.
 #' @param Y n-vector giving the value of the response (either continuous, numeric-binary 0/1, or \code{Surv} object).
+#' @param weights observation weights. Default is 1 for each observation.
 #' @param family should be "gaussian" for continuous \code{Y}, "binomial" for binary \code{Y}, "cox" for \code{Y} of type \code{Surv}.
-#' @param type.measure The accuracy/error measure computed in cross-validation. It should be "class" (classification error) or "auc" (area under the ROC curve) if \code{family="binomial"}, "mse" (mean squared error) if \code{family="gaussian"} and "deviance" if \code{family="cox"} which uses the partial-likelihood.
+#' @param type.measure accuracy/error measure computed in cross-validation. It should be "class" (classification error) or "auc" (area under the ROC curve) if \code{family="binomial"}, "mse" (mean squared error) if \code{family="gaussian"} and "deviance" if \code{family="cox"} which uses the partial-likelihood.
 #' @param blocks list of the format \code{list(bp1=...,bp2=...,)}, where the dots should be replaced by the indices of the predictors included in this block. The blocks should form a partition of 1:p.
 #' @param max.coef vector with integer values which specify the number of maximal coefficients for each block. The first entry is omitted if \code{block1.penalization = FALSE}. Default is \code{NULL}.
 #' @param block1.penalization whether the first block should be penalized. Default is TRUE.
 #' @param lambda.type specifies the value of lambda used for the predictions. \code{lambda.min} gives lambda with minimum cross-validated errors. \code{lambda.1se} gives the largest value of lambda such that the error is within 1 standard error of the minimum. Note that \code{lambda.1se} can only be chosen without restrictions of \code{max.coef}.
 #' @param standardize logical, whether the predictors should be standardized or not. Default is TRUE.
 #' @param nfolds the number of CV procedure folds.
+#' @param foldid an optional vector of values between 1 and nfold identifying what fold each observation is in.
 #' @param cvoffset logical, whether CV should be used to estimate the offsets. Default is FALSE.
 #' @param cvoffsetnfolds the number of folds in the CV procedure that is performed to estimate the offsets. Default is 10. Only relevant if \code{cvoffset=TRUE}.
-#' @param ... Other arguments that can be passed to the function \code{cv.glmnet}.
+#' @param ... other arguments that can be passed to the function \code{cv.glmnet}.
 #'
 #' @return object of class \code{prioritylasso} with the following elements. If these elements are lists, they contain the results for each penalized block.
 #' \describe{
@@ -40,10 +42,10 @@
 #' }
 #'
 #' @note The function description and the first example are based on the R package \code{ipflasso}. The second example is inspired by the example of \code{\link[glmnet]{cv.glmnet}} from the \code{glmnet} package.
-#' @author Simon Klau, Roman Hornung \cr
+#' @author Simon Klau, Roman Hornung, Alina Bauer \cr
 #' Maintainer: Simon Klau (\email{simonklau@ibe.med.uni-muenchen.de})
 #' @seealso \code{\link[prioritylasso]{pl_data}}, \code{\link[prioritylasso]{cvm_prioritylasso}}, \code{\link[ipflasso]{cvr.ipflasso}}, \code{\link[ipflasso]{cvr2.ipflasso}}
-#' @references Klau, Simon (2016): Praediktion der Ueberlebenszeit von Leukaemie-Patienten unter Beruecksichtigung verschiedener omics-Daten. Institut fuer Statistik, Ludwig-Maximilians-Universitaet Muenchen.
+#' @references Klau, S., Jurinovic, V., Hornung, R., Herold, T., Boulesteix, A.-L. (2018). Priority-Lasso: a simple hierarchical approach to the prediction of clinical outcome using multi-omics data. BMC Bioinformatics 19, 322
 #' @export
 #' @import stats
 #' @import glmnet
@@ -84,9 +86,9 @@
 
 
 
-prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
+prioritylasso <- function(X, Y, weights, family, type.measure, blocks, max.coef = NULL,
                           block1.penalization = TRUE, lambda.type = "lambda.min", standardize = TRUE,
-                          nfolds = 10, cvoffset = FALSE, cvoffsetnfolds = 10, ...){
+                          nfolds = 10, foldid, cvoffset = FALSE, cvoffsetnfolds = 10, ...){
 
   if (packageVersion("glmnet") < "2.0.13") {
     stop("glmnet >= 2.0.13 needed for this function.", call. = FALSE)
@@ -149,6 +151,32 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
     }
   }
 
+
+  if(missing(weights)){
+    weights = rep(1, nrow(X))}
+  else {
+    if (length(weights) != nrow(X))
+      stop(paste("number of elements in weights (", length(weights),
+                 ") not equal to the number of rows of X (", nrow(X),
+                 ")", sep = "")) }
+
+
+  if(!missing(foldid)){
+    if (length(foldid) != nrow(X))
+      stop(paste("number of elements in foldid (", length(foldid),
+                 ") not equal to the number of rows of X (", nrow(X),
+                 ")", sep = ""))
+    else {
+      if(nfolds != max(foldid)){
+        warning(paste("nfolds is set to", max(foldid)))
+        nfolds = max(foldid)
+      }
+    }
+  } else {
+    foldid = sample(rep(seq(nfolds), length = nrow(X)))
+  }
+
+
   lambda.min <- list()
   lambda.ind <- list()
   min.cvm <- list()
@@ -166,8 +194,8 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
 
       actual_block <- blocks[[i]]
 
-      lassoerg[[i]] <- cv.glmnet(X[,actual_block], Y, offset = liste[[i]], family = family, type.measure = type.measure,
-                                 nfolds = nfolds, standardize = standardize, ...)
+      lassoerg[[i]] <- cv.glmnet(X[,actual_block], Y, weights, offset = liste[[i]], family = family, type.measure = type.measure,
+                                 nfolds = nfolds, foldid = foldid, standardize = standardize, ...)
 
       if(lambda.type == "lambda.1se"){
 
@@ -177,15 +205,15 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
           for(count in seq(along=cvdiv)) {
             if(!is.null(liste[[i]])){
               lassoergtemp <- cv.glmnet(X[cvdiv[[count]] == 1,actual_block, drop = FALSE],
-                                        Y[cvdiv[[count]] == 1], offset = liste[[i]][cvdiv[[count]] == 1, drop = FALSE],
+                                        Y[cvdiv[[count]] == 1], weights[cvdiv[[count]] == 1], offset = liste[[i]][cvdiv[[count]] == 1, drop = FALSE],
                                         family = family, type.measure = type.measure,
-                                        nfolds = nfolds, standardize = standardize, ...)
+                                        nfolds = nfolds, foldid = foldid[cvdiv[[count]] == 1], standardize = standardize, ...)
             }
             else {
               lassoergtemp <- cv.glmnet(X[cvdiv[[count]] == 1,actual_block,drop = FALSE],
-                                        Y[cvdiv[[count]] == 1], offset = NULL,
+                                        Y[cvdiv[[count]] == 1], weights[cvdiv[[count]] == 1], offset = NULL,
                                         family = family, type.measure = type.measure,
-                                        nfolds = nfolds, standardize = standardize, ...)
+                                        nfolds = nfolds, foldid = foldid[cvdiv[[count]] == 1], standardize = standardize, ...)
             }
 
             pred[cvdiv[[count]] == 0,] <- predict(lassoergtemp, newx = X[cvdiv[[count]] == 0, actual_block],
@@ -219,13 +247,15 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
           for(count in seq(along = cvdiv)) {
             if(!is.null(liste[[i]])){
               lassoergtemp <- cv.glmnet(X[cvdiv[[count]] == 1, actual_block, drop=FALSE], Y[cvdiv[[count]]==1],
+                                        weights[cvdiv[[count]] == 1],
                                         offset = liste[[i]][cvdiv[[count]]==1,drop=FALSE],
                                         family = family, type.measure = type.measure,
-                                        nfolds = nfolds, standardize = standardize, ...)
+                                        nfolds = nfolds, foldid = foldid[cvdiv[[count]] == 1], standardize = standardize, ...)
             } else {
               lassoergtemp <- cv.glmnet(X[cvdiv[[count]] == 1, actual_block, drop=FALSE], Y[cvdiv[[count]]==1],
+                                        weights[cvdiv[[count]] == 1],
                                         offset = NULL, family = family, type.measure = type.measure,
-                                        nfolds = nfolds, standardize = standardize, ...)
+                                        nfolds = nfolds, foldid = foldid[cvdiv[[count]] == 1], standardize = standardize, ...)
             }
 
             which_lambdatemp <- which(as.numeric(lassoergtemp$nzero) <= max.coef[i])
@@ -274,18 +304,18 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
     }
 
     if(family != "cox"){
-      block1erg <- glm(Y ~ X[,blocks[[1]]], family = family)
+      block1erg <- glm(Y ~ X[,blocks[[1]]], family = family, weights = weights)
       names(block1erg$coefficients) <- substr(names(block1erg$coefficients), start = 17, nchar(names(block1erg$coefficients)))
       if(cvoffset) {
 
-        datablock1 <- data.frame(X[, blocks[[1]], drop=FALSE])   # aenderungen wie im fall von coxph
+        datablock1 <- data.frame(X[, blocks[[1]], drop=FALSE])
         datablock1$Y <- Y
 
         cvdiv <- makeCVdivision(n = nrow(X), K = cvoffsetnfolds, nrep = 1)[[1]]
         pred <- matrix(nrow = nrow(X), ncol=1)
         for(count in seq(along = cvdiv)) {
 
-          block1ergtemp <- glm(Y ~ ., data = datablock1[cvdiv[[count]] == 1,])
+          block1ergtemp <- glm(Y ~ ., data = datablock1[cvdiv[[count]] == 1,], weights = weights[cvdiv[[count]] == 1])
           names(block1ergtemp$coefficients) <- substr(names(block1ergtemp$coefficients), start=17, nchar(names(block1ergtemp$coefficients)))
 
           pred[cvdiv[[count]]==0,] <- as.matrix(predict(block1ergtemp, newdata = datablock1[cvdiv[[count]] == 0,]))
@@ -296,7 +326,7 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
       }
 
     } else {
-      block1erg <- coxph(Y ~ X[,blocks[[1]]], model = TRUE)
+      block1erg <- coxph(Y ~ X[,blocks[[1]]], weights = weights, model = TRUE)
       names(block1erg$coefficients) <- substr(names(block1erg$coefficients), start = 17, nchar(names(block1erg$coefficients)))
 
       if(cvoffset) {
@@ -307,7 +337,8 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
         cvdiv <- makeCVdivision(n = nrow(X), K = cvoffsetnfolds, nrep = 1)[[1]]
         pred <- matrix(nrow = nrow(X), ncol = 1)
         for(count in seq(along = cvdiv)) {
-          block1ergtemp <- coxph(Y ~ ., data = datablock1[cvdiv[[count]] == 1,])
+          block1ergtemp <- coxph(Y ~ ., data = datablock1[cvdiv[[count]] == 1,], weights = weights[cvdiv[[count]] == 1])
+
           names(block1ergtemp$coefficients) <- substr(names(block1ergtemp$coefficients), start = 17,
                                                       nchar(names(block1ergtemp$coefficients)))
           pred[cvdiv[[count]] == 0,] <- as.matrix(predict(block1ergtemp, newdata = datablock1[cvdiv[[count]] == 0,], type = "lp"))
@@ -328,8 +359,8 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
 
       actual_block <- blocks[[i]]
 
-      lassoerg[[i]] <- cv.glmnet(X[,actual_block], Y, offset = liste[[i-1]], family = family, nfolds = nfolds,
-                                 type.measure = type.measure, standardize = standardize, ...)
+      lassoerg[[i]] <- cv.glmnet(X[,actual_block], Y, weights, offset = liste[[i-1]], family = family, nfolds = nfolds,
+                                 type.measure = type.measure, foldid = foldid, standardize = standardize, ...)
 
       if(lambda.type == "lambda.1se"){
 
@@ -339,9 +370,10 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
           for(count in seq(along = cvdiv)) {
 
             lassoergtemp <- cv.glmnet(X[cvdiv[[count]] == 1,actual_block, drop = FALSE], Y[cvdiv[[count]] == 1],
+                                      weights[cvdiv[[count]] == 1],
                                       offset = liste[[i-1]][cvdiv[[count]] == 1, drop=FALSE],
                                       family = family, type.measure = type.measure,
-                                      nfolds = nfolds, standardize = standardize, ...)
+                                      nfolds = nfolds, foldid = foldid[cvdiv[[count]] == 1], standardize = standardize, ...)
 
             pred[cvdiv[[count]] == 0,] <- predict(lassoergtemp, newx = X[cvdiv[[count]] == 0, actual_block],
                                                   newoffset = liste[[i-1]][cvdiv[[count]] == 1, drop = FALSE],
@@ -371,9 +403,10 @@ prioritylasso <- function(X, Y, family, type.measure, blocks, max.coef = NULL,
           pred <- matrix(nrow = nrow(X), ncol=1)
           for(count in seq(along = cvdiv)) {
             lassoergtemp <- cv.glmnet(X[cvdiv[[count]] == 1, actual_block, drop = FALSE], Y[cvdiv[[count]] == 1],
+                                      weights[cvdiv[[count]] == 1],
                                       offset = liste[[i-1]][cvdiv[[count]] == 1, drop = FALSE],
                                       family = family, type.measure = type.measure,
-                                      nfolds = nfolds, standardize = standardize, ...)
+                                      nfolds = nfolds, foldid = foldid[cvdiv[[count]] == 1], standardize = standardize, ...)
 
             which_lambdatemp <- which(as.numeric(lassoergtemp$nzero) <= max.coef[i])
 

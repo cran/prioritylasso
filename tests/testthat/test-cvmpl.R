@@ -66,9 +66,10 @@ test_that("testing error messages", {
 test_that("testing cvm_prioritylasso", {
 
   expect_that(length(cvm_pl1$best.blocks), testthat::equals(3))
-  expect_that(cvm_pl2$name, matches("AUC"))
+  expect_match(cvm_pl2$name, "AUC")
   expect_that(cvm_pl3, is_a("prioritylasso"))
-  expect_that(cvm_pl1a$nzero[[1]] <= 10, is_true())
-  expect_that(sum(unlist(cvm_pl1a$nzero)) <= 22, is_true())
+  expect_true(cvm_pl1a$nzero[[1]] <= 10)
+  expect_true(sum(unlist(cvm_pl1a$nzero)) <= 22)
 
 })
+

@@ -315,7 +315,7 @@ prioritylasso <- function(X, Y, weights, family, type.measure, blocks, max.coef 
         pred <- matrix(nrow = nrow(X), ncol=1)
         for(count in seq(along = cvdiv)) {
 
-          block1ergtemp <- glm(Y ~ ., data = datablock1[cvdiv[[count]] == 1,], weights = weights[cvdiv[[count]] == 1])
+          block1ergtemp <- glm(Y ~ ., data = datablock1[cvdiv[[count]] == 1,], family = family, weights = weights[cvdiv[[count]] == 1])
           names(block1ergtemp$coefficients) <- substr(names(block1ergtemp$coefficients), start=17, nchar(names(block1ergtemp$coefficients)))
 
           pred[cvdiv[[count]]==0,] <- as.matrix(predict(block1ergtemp, newdata = datablock1[cvdiv[[count]] == 0,]))

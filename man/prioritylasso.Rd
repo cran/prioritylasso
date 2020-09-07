@@ -4,10 +4,23 @@
 \alias{prioritylasso}
 \title{Patient outcome prediction based on multi-omics data taking practitioners' preferences into account}
 \usage{
-prioritylasso(X, Y, weights, family, type.measure, blocks,
-  max.coef = NULL, block1.penalization = TRUE,
-  lambda.type = "lambda.min", standardize = TRUE, nfolds = 10,
-  foldid, cvoffset = FALSE, cvoffsetnfolds = 10, ...)
+prioritylasso(
+  X,
+  Y,
+  weights,
+  family,
+  type.measure,
+  blocks,
+  max.coef = NULL,
+  block1.penalization = TRUE,
+  lambda.type = "lambda.min",
+  standardize = TRUE,
+  nfolds = 10,
+  foldid,
+  cvoffset = FALSE,
+  cvoffsetnfolds = 10,
+  ...
+)
 }
 \arguments{
 \item{X}{a (nxp) matrix of predictors with observations in rows and predictors in columns.}

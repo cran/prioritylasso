@@ -4,8 +4,7 @@
 \alias{predict.prioritylasso}
 \title{Predictions from prioritylasso}
 \usage{
-\method{predict}{prioritylasso}(object, newdata, type = c("link",
-  "response"), ...)
+\method{predict}{prioritylasso}(object, newdata, type = c("link", "response"), ...)
 }
 \arguments{
 \item{object}{An object of class \code{prioritylasso}.}
@@ -23,13 +22,13 @@ Predictions that depend on \code{type}.
 Makes predictions for a \code{prioritylasso} object. It can be chosen between linear predictors or fitted values.
 }
 \examples{
-pl_bin <- prioritylasso(X = matrix(rnorm(50*500),50,500), Y = rbinom(50,1,0.5),
+pl_bin <- prioritylasso(X = matrix(rnorm(50*200),50,200), Y = rbinom(50,1,0.5),
                        family = "binomial", type.measure = "auc",
-                       blocks = list(block1=1:13,block2=14:200, block3=201:500),
+                       blocks = list(block1=1:13,block2=14:80, block3=81:200),
                        block1.penalization = TRUE, lambda.type = "lambda.min",
                        standardize = FALSE, nfolds = 5)
 
-newdata_bin <- matrix(rnorm(30*500),30,500)
+newdata_bin <- matrix(rnorm(20*200),20,200)
 
 predict(object = pl_bin, newdata = newdata_bin, type = "response")
 }

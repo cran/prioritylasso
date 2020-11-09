@@ -1,9 +1,9 @@
-52138676adb669e49542d9e331c8eba9 *DESCRIPTION
+ca5a650be754d61629bd7e153316f659 *DESCRIPTION
 7ed89f7ddcd3c5ed82e52f9c922865e9 *NAMESPACE
 9106d6d7f894c7ffc5122545b6828f62 *R/cvm_prioritylasso.R
 de114ec0a30c1352e6f0440e5bf91ccd *R/data.R
 f25f53ab787c9809853247549806739a *R/makeCVdivision.R
-68773663f30764b8be0eaa85b1e8235b *R/predict.prioritylasso.R
+3fdd177296dff59890d360c7d150d392 *R/predict.prioritylasso.R
 3cbcb2d83f780a21ab4b8c207f82e377 *R/prioritylasso.R
 6b212113b489e121d2e6b883315778c5 *build/vignette.rds
 cc8025eb819b6f34a726d6048651bfb3 *data/pl_data.rda
@@ -12,10 +12,6 @@ a98c87dc6330106c5f50ff2dbc2a9506 *inst/doc/prioritylasso_vignette.R
 0c9592befda566bdf2ffa78bf083f3bd *inst/doc/prioritylasso_vignette.html
 a2b4e52498b41ef0e682daad3cc13ea2 *man/cvm_prioritylasso.Rd
 fa46c7717160122034369f12f2f2d6b9 *man/pl_data.Rd
-16a2c7a2fa72eea3c1e433006484c5ad *man/predict.prioritylasso.Rd
+7a133e21d7ffb6ddbe0ca0631947efda *man/predict.prioritylasso.Rd
 23dcd4f621d0c2ba162158aca35beea0 *man/prioritylasso.Rd
-6b233930c22b3f3cd5b2c1d4c26d975d *tests/testthat.R
-5921bf33dbd1eaa90afe4b07e8c0d397 *tests/testthat/test-cvmpl.R
-bb78adc782c37f06cc32fc4f0c869c34 *tests/testthat/test-pl.R
-b55e5754991d1ae9a8fcba212df26c00 *tests/testthat/test-predict.R
 15919c89ecc8a9d56e80b9149e41ae11 *vignettes/prioritylasso_vignette.Rmd

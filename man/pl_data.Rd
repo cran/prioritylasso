@@ -15,7 +15,7 @@ A data frame with 400 rows and 1029 variables:
 }
 }
 \usage{
-pl_data
+data(pl_data)
 }
 \description{
 A data set containing the binary outcome and 1028 predictor variables of 400 artificial AML patients.

@@ -479,6 +479,10 @@ predict.prioritylasso <- function(object,
     }
   }
   
+  if (length(coeff) != object$dim.x[2]) {
+    stop("The number of coefficients does not match the number of covariates.")
+  }
+  
   # only take the coefficients and covariates of the blocks that should be used
   # for prediction
   if (use.blocks[1] != "all") {
@@ -487,7 +491,7 @@ predict.prioritylasso <- function(object,
     }))
     index_covariates <- sort(index_covariates)
     coeff <- coeff[index_covariates]
-    newdata <- newdata[, index_covariates]
+    newdata <- newdata[, index_covariates, drop = FALSE]
   }
   
   ##############################################################################

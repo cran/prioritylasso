@@ -91,7 +91,7 @@ coeff1 <- pl_fit1$coefficients
 coeff1 <- coeff1[coeff1 != 0]
 print(round(coeff1, 4))
 
-## ---- message=FALSE-----------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 library(pROC)
 
 ## -----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ auc(val2_roc)
 ## -----------------------------------------------------------------------------
 roc.test(val1_roc, val2_roc, paired=TRUE)
 
-## ---- fig.width=7.5, fig.height=6---------------------------------------------
+## ----fig.width=7.5, fig.height=6----------------------------------------------
 plot.roc(val1_roc, grid=0.1)
 plot.roc(val2_roc, col="red", add=TRUE)
 legend("bottomright", legend=c("prioritylasso Score 1", "prioritylasso Score 2"),

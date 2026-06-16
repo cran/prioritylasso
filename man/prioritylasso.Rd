@@ -70,9 +70,13 @@ object of class \code{prioritylasso} with the following elements. If these eleme
 \item{\code{lambda.min}}{list with values of lambda for \code{lambda.type}.}
 \item{\code{min.cvm}}{list with the mean cross-validated errors for \code{lambda.type}.}
 \item{\code{nzero}}{list with numbers of non-zero coefficients for \code{lambda.type}.}
-\item{\code{glmnet.fit}}{list of fitted \code{glmnet} objects.}
+\item{\code{glmnet.fit}}{list of fitted \code{glmnet} objects for the penalized blocks.
+If \code{block1.penalization = FALSE}, the first list element is \code{NULL},
+and the unpenalized first-block model is stored in \code{block1unpen}.}
 \item{\code{name}}{a text string indicating type of measure.}
-\item{\code{block1unpen}}{if \code{block1.penalization = FALSE}, the results of either the fitted \code{glm} or \code{coxph} object corresponding to \code{best.blocks}.}
+\item{\code{block1unpen}}{if \code{block1.penalization = FALSE}, the fitted
+\code{glm} or \code{coxph} object for the unpenalized first block. Otherwise
+\code{NULL}.}
 \item{\code{coefficients}}{vector of estimated coefficients. If \code{block1.penalization = FALSE} and \code{family = gaussian} or \code{binomial}, the first entry contains an intercept.}
 \item{\code{call}}{the function call.}
 \item{\code{X}}{the original data used for the calculation or \code{NA} if \code{return.x = FALSE}}

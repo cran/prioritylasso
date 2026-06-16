@@ -50,9 +50,13 @@
 #' \item{\code{lambda.min}}{list with values of lambda for \code{lambda.type}.}
 #' \item{\code{min.cvm}}{list with the mean cross-validated errors for \code{lambda.type}.}
 #' \item{\code{nzero}}{list with numbers of non-zero coefficients for \code{lambda.type}.}
-#' \item{\code{glmnet.fit}}{list of fitted \code{glmnet} objects.}
+#' \item{\code{glmnet.fit}}{list of fitted \code{glmnet} objects for the penalized blocks.
+#' If \code{block1.penalization = FALSE}, the first list element is \code{NULL},
+#' and the unpenalized first-block model is stored in \code{block1unpen}.}
 #' \item{\code{name}}{a text string indicating type of measure.}
-#' \item{\code{block1unpen}}{if \code{block1.penalization = FALSE}, the results of either the fitted \code{glm} or \code{coxph} object corresponding to \code{best.blocks}.}
+#' \item{\code{block1unpen}}{if \code{block1.penalization = FALSE}, the fitted
+#' \code{glm} or \code{coxph} object for the unpenalized first block. Otherwise
+#' \code{NULL}.}
 #' \item{\code{coefficients}}{vector of estimated coefficients. If \code{block1.penalization = FALSE} and \code{family = gaussian} or \code{binomial}, the first entry contains an intercept.}
 #' \item{\code{call}}{the function call.}
 #' \item{\code{X}}{the original data used for the calculation or \code{NA} if \code{return.x = FALSE}}
@@ -545,26 +549,61 @@ prioritylasso <- function(X,
   }
   
   
-  finallist <- list(lambda.ind = lambda.ind,
-                    lambda.type = lambda.type,
-                    lambda.min = lambda.min,
-                    min.cvm = min.cvm,
-                    nzero = nzero,
-                    glmnet.fit = glmnet.fit,
-                    name = name,
-                    block1unpen = block1erg,
-                    coefficients = unlist(coeff),
-                    call = match.call(),
-                    X = x_return_value,
-                    missing.data = missing.data,
-                    imputation.models = imputation_models,
-                    blocks.used.for.imputation = blocks_used_for_imputation,
-                    missingness.pattern = missingness_pattern,
-                    y.scale.param = y.scale.param,
-                    blocks = blocks,
-                    mcontrol = mcontrol,
-                    family = family,
-                    dim.x = dim(X))
+# Store coefficients in the original column order of X.
+# Internally, coeff is collected in block order, i.e. in the order
+# unlist(blocks). For prediction and user-facing output, however,
+# coefficients should correspond to the original columns X[, 1], ..., X[, p].
+
+coefficients_block_order <- unlist(coeff)
+
+if (!block1.penalization && family != "cox") {
+  # For gaussian/binomial with an unpenalized first block,
+  # coeff contains an intercept as first element.
+  intercept <- coefficients_block_order[1]
+  coefficients_without_intercept <- coefficients_block_order[-1]
+
+  coefficients_original_order <- numeric(ncol(X))
+  coefficients_original_order[unlist(blocks)] <- coefficients_without_intercept
+
+  if (!is.null(colnames(X))) {
+    names(coefficients_original_order) <- colnames(X)
+  }
+
+  coefficients_final <- c("(Intercept)" = intercept, coefficients_original_order)
+
+} else {
+  # Penalized first block, or Cox model:
+  # no separate intercept is stored in object$coefficients.
+  coefficients_original_order <- numeric(ncol(X))
+  coefficients_original_order[unlist(blocks)] <- coefficients_block_order
+
+  if (!is.null(colnames(X))) {
+    names(coefficients_original_order) <- colnames(X)
+  }
+
+  coefficients_final <- coefficients_original_order
+}
+
+finallist <- list(lambda.ind = lambda.ind,
+                  lambda.type = lambda.type,
+                  lambda.min = lambda.min,
+                  min.cvm = min.cvm,
+                  nzero = nzero,
+                  glmnet.fit = glmnet.fit,
+                  name = name,
+                  block1unpen = block1erg,
+                  coefficients = coefficients_final,
+                  call = match.call(),
+                  X = x_return_value,
+                  missing.data = missing.data,
+                  imputation.models = imputation_models,
+                  blocks.used.for.imputation = blocks_used_for_imputation,
+                  missingness.pattern = missingness_pattern,
+                  y.scale.param = y.scale.param,
+                  blocks = blocks,
+                  mcontrol = mcontrol,
+                  family = family,
+                  dim.x = dim(X))
   
   class(finallist) <- c("prioritylasso", class(finallist))
   return(finallist)

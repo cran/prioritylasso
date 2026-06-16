@@ -1,3 +1,11 @@
+##### Version 0.4.0
+* Fixed a serious bug that caused incorrect predictions when the supplied block
+  order differed from the column order of the input data. This affected models in
+  which the block priority was changed manually or determined from the data. In
+  previous versions, estimated coefficients could be matched to the wrong
+  variables during prediction, which may have affected prediction performance and
+  benchmark results. Coefficients are now stored and used in the same order as the
+  original input variables.
 
 ##### Version 0.3.0
 * Options added that can deal with blockwise missing data
